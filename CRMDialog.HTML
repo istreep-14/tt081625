@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <title>Bar Employee CRM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Google Sans', Arial, sans-serif;
+            background-color: #f8f9fa;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .crm-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .button-panel {
+            padding: 15px 20px;
+            background-color: white;
+            border-bottom: 1px solid #dadce0;
+            display: flex;
+            gap: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .btn:hover {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border-color: #4285f4;
+        }
+
+        .btn-primary {
+            background-color: #4285f4;
+            color: white;
+            border-color: #4285f4;
+        }
+
+        .btn-primary:hover {
+            background-color: #3367d6;
+        }
+
+        .btn-success {
+            background-color: #34a853;
+            color: white;
+            border-color: #34a853;
+        }
+
+        .btn-success:hover {
+            background-color: #2d9945;
+        }
+
+        .btn-danger {
+            background-color: #ea4335;
+            color: white;
+            border-color: #ea4335;
+        }
+
+        .btn-danger:hover {
+            background-color: #d33b2c;
+        }
+
+        .data-panel {
+            flex: 1;
+            padding: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-section {
+            margin-bottom: 15px;
+        }
+
+        .global-search {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .global-search:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 0 2px rgba(66,133,244,0.2);
+        }
+
+        .table-container {
+            flex: 1;
+            overflow: auto;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dadce0;
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sortable-header {
+            padding: 12px 8px 8px 8px;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #dadce0;
+            font-weight: 500;
+        }
+
+        .sortable-header:hover {
+            background-color: #e8f0fe;
+        }
+
+        .sort-arrow {
+            margin-left: 5px;
+            font-size: 12px;
+            color: #4285f4;
+        }
+
+        .column-filter {
+            width: 100%;
+            padding: 6px 8px;
+            border: none;
+            border-top: 1px solid #dadce0;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .column-filter:focus {
+            background-color: #e8f0fe;
+        }
+
+        .data-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #f1f3f4;
+            vertical-align: top;
+            font-size: 13px;
+        }
+
+        .data-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .data-table tr.active {
+            background-color: #4285f4 !important;
+            color: white;
+        }
+
+        .positions-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .position-tag {
+            background-color: #e8f0fe;
+            color: #4285f4;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 11px;
+            border: 1px solid #dadce0;
+        }
+
+        .data-table tr.active .position-tag {
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .keyboard-hint {
+            font-size: 12px;
+            color: #5f6368;
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #e8f0fe;
+            border-radius: 4px;
+        }
+
+        /* Modal styles for add/edit form */
+        .form-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .form-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            width: 420px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background-color: #4285f4;
+            color: white;
+            padding: 16px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .form-content {
+            padding: 20px;
+            flex: 1 1 auto;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #3c4043;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 0 2px rgba(66,133,244,0.2);
+        }
+
+        .multi-select {
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            max-height: 150px;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .multi-select-option {
+            padding: 10px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .multi-select-option:last-child {
+            border-bottom: none;
+        }
+
+        .multi-select-option:hover {
+            background-color: #f8f9fa;
+        }
+
+        .multi-select-option input {
+            margin-right: 10px;
+        }
+
+        .form-actions {
+            padding: 16px 20px;
+            background-color: #f8f9fa;
+            border-radius: 0 0 8px 8px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            position: sticky;
+            bottom: 0;
+            z-index: 1;
+        }
+
+        .status-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 16px;
+            border-radius: 4px;
+            color: white;
+            font-weight: 500;
+            z-index: 2000;
+            display: none;
+            font-size: 14px;
+        }
+
+        .status-success {
+            background-color: #34a853;
+        }
+
+        .status-error {
+            background-color: #ea4335;
+        }
+
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #5f6368;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .top-panel {
+            display: flex;
+            gap: 20px;
+            align-items: stretch;
+            margin-bottom: 15px;
+        }
+
+        .left-panel {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .active-card {
+            background: white;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            width: auto;
+            flex: 1 1 0;
+        }
+
+        .active-card-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #3c4043;
+            margin-bottom: 8px;
+        }
+
+        .active-card .name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .active-card .detail {
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: #3c4043;
+        }
+
+        .active-card .label {
+            color: #5f6368;
+            font-weight: 500;
+            margin-right: 6px;
+        }
+
+        .active-card .positions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 6px;
+        }
+
+        .active-card-inner {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+        .active-card .photo {
+            flex: 2;
+        }
+        .active-card .photo img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            object-fit: cover;
+            display: block;
+        }
+        .active-card .details {
+            flex: 1;
+            min-width: 0;
+        }
+        .photo-upload {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 12px;
+            align-items: center;
+        }
+        .photo-preview {
+            width: 120px;
+            height: 120px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .photo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        @media (max-width: 1100px) {
+            .top-panel {
+                flex-direction: column;
+            }
+            .active-card {
+                width: 100%;
+                flex: 1 1 auto;
+            }
+            .active-card-inner {
+                flex-direction: column;
+            }
+            .active-card .photo {
+                max-width: 100%;
+            }
+        }
+        /* Added: status badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            border: 1px solid #dadce0;
+        }
+        .status-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-active { background-color: #e8f5e9; color: #1b5e20; border-color: #c8e6c9; }
+        .status-active .dot { background-color: #34a853; }
+        .status-inactive { background-color: #ffebee; color: #b71c1c; border-color: #ffcdd2; }
+        .status-inactive .dot { background-color: #ea4335; }
+
+        /* Added: help icon next to Close button */
+        .help-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border: 1px solid #dadce0;
+            border-radius: 50%;
+            cursor: default;
+            font-weight: 700;
+            color: #3c4043;
+            background: #fff;
+        }
+
+        /* Added: small button */
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
+        /* Added: modal close X */
+        .modal-header { position: relative; }
+        .modal-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: transparent;
+            color: #fff;
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        /* Added: square photo for active card */
+        .active-card .photo.photo-square {
+            width: 180px;
+            height: 180px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f8f9fa;
+            flex: 0 0 auto;
+        }
+        .active-card .photo.photo-square img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Added: grid card view */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding: 12px;
+        }
+        .employee-card {
+            background: #fff;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            cursor: pointer;
+            transition: box-shadow 0.2s, transform 0.05s;
+        }
+        .employee-card:hover {
+            box-shadow: 0 1px 6px rgba(0,0,0,0.12);
+        }
+        .employee-card.selected {
+            outline: 2px solid #4285f4;
+        }
+        .employee-card .card-photo {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #dadce0;
+            background: #f8f9fa;
+        }
+        .employee-card .card-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .employee-card .card-name {
+            font-weight: 600;
+        }
+        .employee-card .card-positions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .employee-card .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        /* Me highlighting and crown */
+        .me-crown { margin-right: 6px; font-size: 14px; }
+        .data-table tr.is-me { background-image: linear-gradient(to right, rgba(245,158,11,0.15), transparent); }
+        .employee-card.is-me { border-color: #f59e0b !important; box-shadow: 0 0 0 2px rgba(245,158,11,0.35); }
+
+        /* Manager/Assistant highlights */
+        .data-table tr.manager-highlight { box-shadow: inset 4px 0 0 0 #8e24aa; }
+        .data-table tr.assistant-highlight { box-shadow: inset 4px 0 0 0 #0288d1; }
+        .role-badge { display: inline-block; font-size: 11px; padding: 2px 6px; border-radius: 999px; margin-left: 6px; border: 1px solid transparent; }
+        .role-badge.manager { background-color: #f3e5f5; color: #6a1b9a; border-color: #e1bee7; }
+        .role-badge.assistant { background-color: #e1f5fe; color: #01579b; border-color: #b3e5fc; }
+
+        /* Role flags section in form */
+        .role-flags { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+        .role-flags label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+
+        /* Theme toggle: dark mode */
+        body.dark { background: #0b1220; color: #e5e7eb; }
+        body.dark .crm-container .header h1 { color: #e5e7eb; }
+        body.dark .data-table { background: #0f172a; color: #e5e7eb; }
+        body.dark .data-table th { background: #1f2937; color: #e5e7eb; border-color: #374151; }
+        body.dark .data-table td { border-color: #374151; }
+        body.dark .form-modal { background: #111827; color: #e5e7eb; }
+        body.dark .modal-header { background-color: #334155; }
+        body.dark .active-card { background: #0d1627; border-color: #334155; }
+        body.dark .employee-card { background: #0f172a; border-color: #334155; }
+        body.dark .status-message { background: #1f2937; color: #e5e7eb; border-color: #374151; }
+        body.dark .position-tag { border-color: #334155; }
+        body.dark .column-filter, body.dark .global-search, body.dark .form-control, body.dark select { background: #0b1020; color: #e5e7eb; border-color: #374151; }
+        body.dark .btn { background: #1f2937; color: #e5e7eb; border-color: #374151; }
+        body.dark .btn-success { background: #065f46; }
+        body.dark .btn-danger { background: #7f1d1d; }
+        body.dark .btn-primary { background: #1e3a8a; }
+        body.dark .data-table tr:hover { background: #122034; }
+        body.dark .data-table tr.active { background: #0b2542; }
+        body.dark .employee-card.is-me { box-shadow: 0 0 0 2px rgba(245,158,11,0.5); }
+      </style>
+</head>
+<body>
+    <div class="crm-container">
+        <div class="header">
+            <h1>🍺 Bar Employee CRM Manager</h1>
+        </div>
+        
+        <div class="data-panel">
+            <div class="top-panel">
+                <div class="left-panel">
+                    <div class="button-panel">
+                        <button class="btn btn-success" onclick="addEmployee()"><u>A</u>dd New</button>
+                        <button class="btn btn-primary" onclick="editEmployee()"><u>E</u>dit</button>
+                        <button class="btn btn-danger" onclick="deleteEmployee()"><u>D</u>elete</button>
+                        <button class="btn" onclick="google.script.host.close()" id="closeButton">Close [ X ]</button>
+                        <button class="btn" id="toggleViewButton" onclick="toggleView()"><u>C</u>ard View</button>
+                        <button class="btn btn-sm" onclick="openPositionsManager()">Edit Positions</button>
+                        <button class="btn btn-sm" id="themeToggleButton" onclick="toggleTheme()" title="Toggle light/dark">🌙</button>
+                    </div>
+                    <div class="search-section">
+                        <input type="text" id="globalSearch" class="global-search" placeholder="Search all employees..." onkeyup="applyFilters()">
+
+                    </div>
+                </div>
+                <div id="activeCard" class="active-card">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👤</div>
+                        <div>Select an employee to preview details</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-container" id="tableContainer">
+                <div id="loadingState" class="empty-state">
+                    <div class="empty-state-icon">⏳</div>
+                    <div>Loading employees...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="statusMessage" class="status-message"></div>
+
+    <!-- Add/Edit Employee Form Modal -->
+    <div id="employeeFormModal" class="form-overlay">
+        <div class="form-modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="formTitle">Add Employee</h2>
+                <button class="modal-close" type="button" onclick="closeEmployeeForm()" aria-label="Close">×</button>
+            </div>
+            
+            <div class="form-content">
+                <form id="employeeForm">
+                    <div class="form-group">
+                        <label class="form-label">Employee ID <span style="color: #ea4335;">*</span></label>
+                        <input type="text" id="empId" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">First Name</label>
+                        <input type="text" id="firstName" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" id="lastName" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Phone</label>
+                        <input type="tel" id="phone" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="email" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Photo</label>
+                        <div class="photo-upload">
+                            <div class="photo-preview" id="photoPreviewContainer">
+                                <img id="photoPreview" alt="Photo preview" style="display:none;">
+                            </div>
+                            <div>
+                                <input type="text" id="photoUrl" class="form-control" placeholder="Paste image URL or upload below" oninput="updatePhotoPreview(this.value)">
+                                <input type="file" id="photoFile" accept="image/*" onchange="onPhotoFileSelected(event)" style="margin-top: 8px;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Position(s)</label>
+                        <div class="multi-select" id="positionSelect">
+                            <div class="multi-select-option">
+                                <input type="checkbox" id="pos-bartender" value="Bartender">
+                                <label for="pos-bartender">Bartender</label>
+                            </div>
+                            <div class="multi-select-option">
+                                <input type="checkbox" id="pos-server" value="Server">
+                                <label for="pos-server">Server</label>
+                            </div>
+                            <div class="multi-select-option">
+                                <input type="checkbox" id="pos-manager" value="Manager">
+                                <label for="pos-manager">Manager</label>
+                            </div>
+                            <div class="multi-select-option">
+                                <input type="checkbox" id="pos-host" value="Host">
+                                <label for="pos-host">Host</label>
+                            </div>
+                            <div class="multi-select-option">
+                                <input type="checkbox" id="pos-kitchen" value="Kitchen Staff">
+                                <label for="pos-kitchen">Kitchen Staff</label>
+                            </div>
+                            <div class="multi-select-option">
+                                <input type="checkbox" id="pos-security" value="Security">
+                                <label for="pos-security">Security</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Roles</label>
+                        <div class="role-flags">
+                            <label><input type="checkbox" id="flag-isMe"> This is me</label>
+                            <label><input type="checkbox" id="flag-manager"> Manager</label>
+                            <label><input type="checkbox" id="flag-asstManager"> Assistant Manager</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select id="status" class="form-control">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Notes</label>
+                        <textarea id="note" class="form-control" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn" onclick="closeEmployeeForm()" id="formCloseBtn">Close</button>
+                <button type="button" class="btn btn-success" onclick="saveEmployee()">Save Employee</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let employees = [];
+        let filteredEmployees = [];
+        let activeRowIndex = -1;
+        let sortColumn = '';
+        let sortDirection = 'asc';
+        let isEditing = false;
+        let editingIndex = -1;
+        let columnFilters = {};
+        let isCardView = false;
+        let cardViewSelectedIndex = -1;
+        let positionsPalette = {
+            'Bartender': '#F3E5F5',
+            'Server': '#E3F2FD',
+            'Manager': '#E8F5E9',
+            'Host': '#FFF3E0',
+            'Kitchen Staff': '#E0F2F1',
+            'Security': '#FFEBEE',
+            'Assistant Manager': '#FFF8E1'
+        };
+        let meEmpId = '';
+        let editingOriginalEmpId = '';
+
+        // Initialize when the dialog opens
+        window.onload = function() {
+            // Theme
+            try {
+                const theme = localStorage.getItem('crm_theme') || 'light';
+                if (theme === 'dark') document.body.classList.add('dark');
+                updateThemeIcon();
+            } catch (e) {}
+
+            // Load data
+            loadEmployees();
+            loadPositionsFromServer();
+            google.script.run
+                .withSuccessHandler(function(res){ if (res && res.success) { meEmpId = res.empId || ''; refreshTable(); } })
+                .withFailureHandler(function(){})
+                .getMeEmployeeId();
+        };
+
+        // Load employees from Google Sheets
+        function loadEmployees() {
+            showStatus('Loading employees...', 'success');
+            document.body.classList.add('loading');
+            
+            google.script.run
+                .withSuccessHandler(onLoadSuccess)
+                .withFailureHandler(onLoadError)
+                .getAllEmployees();
+        }
+
+        function onLoadSuccess(result) {
+            document.body.classList.remove('loading');
+            
+            if (result.success) {
+                employees = result.employees || [];
+                showStatus(`Loaded ${employees.length} employees`, 'success');
+                refreshTable();
+            } else {
+                showStatus('Error loading employees: ' + result.error, 'error');
+                showEmptyState('Error loading data');
+            }
+        }
+
+        function onLoadError(error) {
+            document.body.classList.remove('loading');
+            console.error('Error loading employees:', error);
+            showStatus('Failed to load employees: ' + error.message, 'error');
+            showEmptyState('Failed to load data');
+        }
+
+        // Save employees to Google Sheets
+        function saveEmployees() {
+            showStatus('Saving to Google Sheets...', 'success');
+            
+            google.script.run
+                .withSuccessHandler(onSaveSuccess)
+                .withFailureHandler(onSaveError)
+                .saveAllEmployees(employees);
+        }
+
+        function onSaveSuccess(result) {
+            if (result.success) {
+                showStatus('Employees saved successfully!', 'success');
+            } else {
+                showStatus('Error saving employees: ' + result.error, 'error');
+            }
+        }
+
+        function onSaveError(error) {
+            console.error('Error saving employees:', error);
+            showStatus('Failed to save employees: ' + error.message, 'error');
+        }
+
+        // Employee CRUD operations
+        function addEmployee() {
+            isEditing = false;
+            editingIndex = -1;
+            clearForm();
+            openEmployeeForm('Add New Employee');
+            setTimeout(() => document.getElementById('empId').focus(), 100);
+        }
+
+        function editEmployee() {
+            if (activeRowIndex === -1) {
+                showStatus('Please select an employee to edit', 'error');
+                return;
+            }
+            
+            const employee = filteredEmployees[activeRowIndex];
+            const originalIndex = employees.findIndex(emp => emp.empId === employee.empId);
+            
+            isEditing = true;
+            editingIndex = originalIndex;
+            editingOriginalEmpId = employees[originalIndex]?.empId || '';
+            
+            // Populate form
+            document.getElementById('empId').value = employee.empId;
+            document.getElementById('firstName').value = employee.firstName || '';
+            document.getElementById('lastName').value = employee.lastName || '';
+            document.getElementById('phone').value = employee.phone || '';
+            document.getElementById('email').value = employee.email || '';
+            document.getElementById('note').value = employee.note || '';
+            document.getElementById('status').value = employee.status || 'Active';
+            
+            document.getElementById('photoUrl').value = employee.photoUrl || '';
+            updatePhotoPreview(employee.photoUrl || '');
+            
+            // Set position checkboxes
+                            let positions = employee.position ? employee.position.split(', ') : [];
+                hydratePositionChecklist();
+                document.querySelectorAll('#positionSelect input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.checked = positions.includes(checkbox.value);
+                });
+
+            // Set role flags
+            const isManager = positions.includes('Manager');
+            const isAsst = positions.includes('Assistant Manager');
+            const isMeFlag = (employee.empId || '') === meEmpId;
+            const flagMe = document.getElementById('flag-isMe');
+            const flagMgr = document.getElementById('flag-manager');
+            const flagAsst = document.getElementById('flag-asstManager');
+            if (flagMe) flagMe.checked = !!isMeFlag;
+            if (flagMgr) flagMgr.checked = !!isManager;
+            if (flagAsst) flagAsst.checked = !!isAsst;
+            
+            openEmployeeForm('Edit Employee: ' + employee.empId);
+            setTimeout(() => document.getElementById('empId').focus(), 100);
+        }
+
+        function deleteEmployee() {
+            if (activeRowIndex === -1) {
+                showStatus('Please select an employee to delete', 'error');
+                return;
+            }
+            
+            const employee = filteredEmployees[activeRowIndex];
+            
+            if (confirm(`⚠️ Are you sure you want to permanently delete employee ${employee.empId}${employee.firstName ? ' - ' + employee.firstName + ' ' + employee.lastName : ''}?\n\nThis action cannot be undone.`)) {
+                const originalIndex = employees.findIndex(emp => emp.empId === employee.empId);
+                employees.splice(originalIndex, 1);
+                
+                showStatus(`Employee ${employee.empId} deleted`, 'success');
+                refreshTable();
+                saveEmployees();
+                
+                // Reset active row
+                activeRowIndex = -1;
+            }
+        }
+
+        function saveEmployee() {
+            const form = document.getElementById('employeeForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const empId = document.getElementById('empId').value.trim();
+            if (!empId) {
+                showStatus('Employee ID is required', 'error');
+                return;
+            }
+            
+            // Check for duplicate ID when adding or when editing and ID changed
+            if (!isEditing || (isEditing && employees[editingIndex].empId !== empId)) {
+                if (employees.some(emp => emp.empId === empId)) {
+                    showStatus('Employee ID already exists', 'error');
+                    return;
+                }
+            }
+            
+            // Get selected positions
+            const selectedPositions = [];
+            document.querySelectorAll('#positionSelect input[type="checkbox"]:checked').forEach(checkbox => {
+                selectedPositions.push(checkbox.value);
+            });
+
+            // Apply role flags to positions list
+            const isMeFlag = document.getElementById('flag-isMe')?.checked;
+            const isManager = document.getElementById('flag-manager')?.checked;
+            const isAsst = document.getElementById('flag-asstManager')?.checked;
+            if (isManager && !selectedPositions.includes('Manager')) selectedPositions.push('Manager');
+            if (isAsst && !selectedPositions.includes('Assistant Manager')) selectedPositions.push('Assistant Manager');
+            
+            const employee = {
+                empId: empId,
+                firstName: document.getElementById('firstName').value.trim(),
+                lastName: document.getElementById('lastName').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                position: selectedPositions.join(', '),
+                status: document.getElementById('status').value,
+                note: document.getElementById('note').value.trim(),
+                photoUrl: document.getElementById('photoUrl').value.trim()
+            };
+            
+            if (isEditing) {
+                employees[editingIndex] = employee;
+                showStatus('Employee updated successfully', 'success');
+            } else {
+                employees.push(employee);
+                showStatus('Employee added successfully', 'success');
+            }
+            
+            // Persist "me" setting if changed
+            if (isMeFlag) {
+                google.script.run
+                    .withSuccessHandler(function(){ meEmpId = empId; refreshTable(); })
+                    .withFailureHandler(function(){})
+                    .setMeEmployeeId(empId);
+            } else if (editingOriginalEmpId && editingOriginalEmpId === meEmpId) {
+                // If we were editing the current "me" and the flag is now off, clear it
+                google.script.run
+                    .withSuccessHandler(function(){ meEmpId = ''; refreshTable(); })
+                    .withFailureHandler(function(){})
+                    .clearMeEmployeeId();
+            }
+
+            closeEmployeeForm();
+            refreshTable();
+            saveEmployees();
+        }
+
+        function openEmployeeForm(title) {
+            document.getElementById('formTitle').textContent = title;
+            document.getElementById('employeeFormModal').style.display = 'block';
+        }
+
+        function closeEmployeeForm() {
+            document.getElementById('employeeFormModal').style.display = 'none';
+            clearForm();
+            isEditing = false;
+            editingIndex = -1;
+        }
+
+        function clearForm() {
+            document.getElementById('employeeForm').reset();
+            hydratePositionChecklist();
+            document.querySelectorAll('#positionSelect input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            const photoUrlInput = document.getElementById('photoUrl');
+            if (photoUrlInput) photoUrlInput.value = '';
+            const photoFileInput = document.getElementById('photoFile');
+            if (photoFileInput) photoFileInput.value = '';
+            updatePhotoPreview('');
+            const flagMe = document.getElementById('flag-isMe');
+            const flagMgr = document.getElementById('flag-manager');
+            const flagAsst = document.getElementById('flag-asstManager');
+            if (flagMe) flagMe.checked = false;
+            if (flagMgr) flagMgr.checked = false;
+            if (flagAsst) flagAsst.checked = false;
+            editingOriginalEmpId = '';
+        }
+
+        function renderCardGrid() {
+            const container = document.getElementById('tableContainer');
+            const grid = document.createElement('div');
+            grid.className = 'card-grid';
+
+            if (filteredEmployees.length === 0) {
+                container.innerHTML = '';
+                const empty = document.createElement('div');
+                empty.className = 'empty-state';
+                empty.innerHTML = '<div class="empty-state-icon">📋</div><div>No employees to show</div>';
+                container.appendChild(empty);
+                renderActiveCard();
+                return;
+            }
+
+            filteredEmployees.forEach((employee, index) => {
+                const card = document.createElement('div');
+                card.className = 'employee-card';
+                if (index === cardViewSelectedIndex) card.classList.add('selected');
+                if ((employee.empId || '') === meEmpId) card.classList.add('is-me');
+                card.tabIndex = 0;
+                card.onclick = () => { cardViewSelectedIndex = index; activeRowIndex = index; renderCardGrid(); };
+
+                // card color by first position
+                const firstPosition = (employee.position || '').split(', ')[0];
+                if (firstPosition && positionsPalette[firstPosition]) {
+                    card.style.borderColor = '#cfd8dc';
+                    card.style.background = positionsPalette[firstPosition];
+                }
+
+                const photoDiv = document.createElement('div');
+                photoDiv.className = 'card-photo';
+                if (employee.photoUrl) {
+                    photoDiv.innerHTML = `<img src="${employee.photoUrl}" alt="Employee photo">`;
+                } else {
+                    photoDiv.innerHTML = `<div class="empty-state-icon" style="font-size:36px; line-height: 120px; text-align:center;">👤</div>`;
+                }
+
+                const name = document.createElement('div');
+                const fullName = [employee.firstName || '', employee.lastName || ''].filter(Boolean).join(' ') || '(No Name)';
+                name.className = 'card-name';
+                name.textContent = fullName;
+                if ((employee.empId || '') === meEmpId) {
+                    const crown = document.createElement('span');
+                    crown.className = 'me-crown';
+                    crown.textContent = '👑';
+                    name.prepend(crown);
+                }
+
+                const pos = document.createElement('div');
+                pos.className = 'card-positions';
+                (employee.position || '').split(', ').filter(Boolean).forEach(p => {
+                    const tag = document.createElement('span');
+                    tag.className = 'position-tag';
+                    if (positionsPalette[p]) {
+                        tag.style.backgroundColor = positionsPalette[p];
+                        tag.style.color = '#1f2937';
+                        tag.style.borderColor = '#cbd5e1';
+                    }
+                    tag.textContent = p;
+                    pos.appendChild(tag);
+                });
+
+                const footer = document.createElement('div');
+                footer.className = 'card-footer';
+                footer.innerHTML = `
+                    <span>${renderStatusBadge(employee.status)}</span>
+                    <button class="btn btn-sm" onclick="selectRow(${index}); event.stopPropagation();">Details</button>
+                `;
+
+                card.appendChild(photoDiv);
+                card.appendChild(name);
+                if (pos.childNodes.length) card.appendChild(pos);
+                card.appendChild(footer);
+                grid.appendChild(card);
+            });
+
+            container.innerHTML = '';
+            container.appendChild(grid);
+            renderActiveCard();
+            ensureActiveVisible();
+        }
+
+        function toggleView() {
+            isCardView = !isCardView;
+            const btn = document.getElementById('toggleViewButton');
+            if (btn) btn.innerHTML = isCardView ? '<u>T</u>able View' : '<u>C</u>ard View';
+            cardViewSelectedIndex = isCardView ? Math.max(0, activeRowIndex) : -1;
+            renderTable();
+        }
+
+        function moveCardSelection(direction) {
+            if (!isCardView || filteredEmployees.length === 0) return;
+            const cols = 4;
+            const maxIndex = filteredEmployees.length - 1;
+            let next = cardViewSelectedIndex;
+            if (next < 0) next = 0;
+            switch(direction) {
+                case 'left': next = Math.max(0, next - 1); break;
+                case 'right': next = Math.min(maxIndex, next + 1); break;
+                case 'up': next = Math.max(0, next - cols); break;
+                case 'down': next = Math.min(maxIndex, next + cols); break;
+            }
+            cardViewSelectedIndex = next;
+            activeRowIndex = next;
+            renderCardGrid();
+        }
+
+        // Table management functions
+        function refreshTable() {
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('globalSearch').value.toLowerCase();
+            
+            // Start with all employees
+            filteredEmployees = [...employees];
+            
+            // Apply global search
+            if (searchTerm) {
+                filteredEmployees = filteredEmployees.filter(emp => {
+                    return Object.values(emp).some(value => 
+                        value && value.toString().toLowerCase().includes(searchTerm)
+                    );
+                });
+            }
+            
+            // Apply column filters
+            columnFilters = {};
+            document.querySelectorAll('.column-filter').forEach(filter => {
+                const column = filter.dataset.column;
+                const filterValueRaw = filter.value || '';
+                const filterValue = filterValueRaw.toLowerCase();
+                columnFilters[column] = filterValueRaw;
+                if (filterValue) {
+                    filteredEmployees = filteredEmployees.filter(emp => {
+                        const cellValue = emp[column] || '';
+                        return cellValue.toString().toLowerCase().includes(filterValue);
+                    });
+                }
+            });
+            
+            // Apply sorting
+            if (sortColumn) {
+                filteredEmployees.sort((a, b) => {
+                    const aVal = a[sortColumn] || '';
+                    const bVal = b[sortColumn] || '';
+                    const comparison = aVal.toString().localeCompare(bVal.toString(), undefined, { numeric: true });
+                    return sortDirection === 'asc' ? comparison : -comparison;
+                });
+            }
+
+            if (activeRowIndex >= filteredEmployees.length) {
+                activeRowIndex = -1;
+            }
+            
+            renderTable();
+        }
+
+        function renderTable() {
+            if (isCardView) { renderCardGrid(); return; }
+            const container = document.getElementById('tableContainer');
+            
+            const table = document.createElement('table');
+            table.className = 'data-table';
+            
+            // Create header
+            const headerRow = document.createElement('tr');
+            const columns = [
+                { key: 'empId', label: 'Emp ID' },
+                { key: 'firstName', label: 'First Name' },
+                { key: 'lastName', label: 'Last Name' },
+                { key: 'phone', label: 'Phone' },
+                { key: 'email', label: 'Email' },
+                { key: 'position', label: 'Position' },
+                { key: 'status', label: 'Status' },
+                { key: 'note', label: 'Notes' }
+            ];
+            
+            columns.forEach(col => {
+                const th = document.createElement('th');
+                th.innerHTML = `
+                    <div class="header-content">
+                        <div class="sortable-header" onclick="sortTable('${col.key}')">
+                            ${col.label}
+                            <span class="sort-arrow">${getSortArrow(col.key)}</span>
+                        </div>
+                        <input type="text" class="column-filter" data-column="${col.key}" 
+                               placeholder="Filter..." onkeyup="applyFilters()">
+                    </div>
+                `;
+                const inputEl = th.querySelector('input');
+                if (inputEl && columnFilters && Object.prototype.hasOwnProperty.call(columnFilters, col.key)) {
+                    inputEl.value = columnFilters[col.key] || '';
+                }
+                headerRow.appendChild(th);
+            });
+            
+            table.appendChild(headerRow);
+            
+            if (filteredEmployees.length === 0) {
+                const emptyRow = document.createElement('tr');
+                const emptyCell = document.createElement('td');
+                emptyCell.colSpan = columns.length;
+                emptyCell.style.padding = '24px';
+                emptyCell.style.textAlign = 'center';
+                emptyCell.textContent = employees.length === 0
+                    ? 'No employees found. Click "Add New" to get started!'
+                    : 'No employees match your search criteria. Clear or adjust filters to see results.';
+                emptyRow.appendChild(emptyCell);
+                table.appendChild(emptyRow);
+                
+                container.innerHTML = '';
+                container.appendChild(table);
+                renderActiveCard();
+                return;
+            }
+            
+            // Create data rows
+            filteredEmployees.forEach((employee, index) => {
+                const row = document.createElement('tr');
+                row.onclick = () => selectRow(index);
+                if (index === activeRowIndex) {
+                    row.classList.add('active');
+                }
+                // position color background hint
+                const firstPosition = (employee.position || '').split(', ')[0];
+                if (firstPosition && positionsPalette[firstPosition]) {
+                    row.style.setProperty('--rowAccent', positionsPalette[firstPosition]);
+                    row.style.background = 'var(--rowBg, #fff)';
+                }
+
+                const positionsList = (employee.position || '').split(', ').filter(Boolean);
+                const isManager = positionsList.includes('Manager');
+                const isAsst = positionsList.includes('Assistant Manager');
+                const isMe = (employee.empId || '') === meEmpId;
+                if (isManager) row.classList.add('manager-highlight');
+                if (isAsst) row.classList.add('assistant-highlight');
+                if (isMe) row.classList.add('is-me');
+                
+                // Employee ID
+                const empIdCell = document.createElement('td');
+                empIdCell.textContent = employee.empId;
+                if (isMe) {
+                    const crown = document.createElement('span');
+                    crown.className = 'me-crown';
+                    crown.textContent = '👑';
+                    empIdCell.prepend(crown);
+                }
+                row.appendChild(empIdCell);
+                
+                // First Name
+                const firstNameCell = document.createElement('td');
+                firstNameCell.textContent = employee.firstName || '';
+                if (isManager) {
+                    const b = document.createElement('span'); b.className = 'role-badge manager'; b.textContent = 'Manager'; firstNameCell.appendChild(b);
+                }
+                if (isAsst) {
+                    const b2 = document.createElement('span'); b2.className = 'role-badge assistant'; b2.textContent = 'Asst. Manager'; firstNameCell.appendChild(b2);
+                }
+                row.appendChild(firstNameCell);
+                
+                // Last Name
+                const lastNameCell = document.createElement('td');
+                lastNameCell.textContent = employee.lastName || '';
+                row.appendChild(lastNameCell);
+                
+                // Phone
+                const phoneCell = document.createElement('td');
+                phoneCell.textContent = employee.phone || '';
+                row.appendChild(phoneCell);
+                
+                // Email
+                const emailCell = document.createElement('td');
+                emailCell.textContent = employee.email || '';
+                row.appendChild(emailCell);
+                
+                // Position
+                const positionCell = document.createElement('td');
+                if (employee.position) {
+                    const positions = employee.position.split(', ');
+                    const positionsDiv = document.createElement('div');
+                    positionsDiv.className = 'positions-display';
+                    positions.forEach(pos => {
+                        const tag = document.createElement('span');
+                        tag.className = 'position-tag';
+                        if (positionsPalette[pos]) {
+                            tag.style.backgroundColor = positionsPalette[pos];
+                            tag.style.color = '#1f2937';
+                            tag.style.borderColor = '#cbd5e1';
+                        }
+                        tag.textContent = pos;
+                        positionsDiv.appendChild(tag);
+                    });
+                    positionCell.appendChild(positionsDiv);
+                }
+                row.appendChild(positionCell);
+                
+                // Status
+                const statusCell = document.createElement('td');
+                statusCell.innerHTML = renderStatusBadge(employee.status);
+                row.appendChild(statusCell);
+                
+                // Notes
+                const noteCell = document.createElement('td');
+                noteCell.textContent = employee.note || '';
+                row.appendChild(noteCell);
+                
+                table.appendChild(row);
+            });
+            
+            container.innerHTML = '';
+            container.appendChild(table);
+            renderActiveCard();
+            ensureActiveVisible();
+        }
+
+        function renderActiveCard() {
+            const card = document.getElementById('activeCard');
+            if (!card) return;
+
+            const employee = (activeRowIndex >= 0 && activeRowIndex < filteredEmployees.length)
+                ? filteredEmployees[activeRowIndex]
+                : null;
+
+            if (!employee) {
+                card.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👤</div>
+                        <div>Select an employee to preview details</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const fullName = [employee.firstName || '', employee.lastName || ''].filter(Boolean).join(' ');
+            const positionsHtml = (employee.position || '')
+                .split(', ')
+                .filter(Boolean)
+                .map(pos => `<span class=\"position-tag\" style=\"${positionsPalette[pos] ? `background-color: ${positionsPalette[pos]}; color: #1f2937; border-color: #cbd5e1;` : ''}\">${pos}</span>`)
+                .join('');
+
+            const photoHtml = employee.photoUrl ? `<img src="${employee.photoUrl}" alt="Employee photo">` : `<div class="empty-state-icon" style="font-size:72px;">👤</div>`;
+
+            card.innerHTML = `
+                <div class="active-card-inner">
+                    <div class="photo photo-square">
+                        ${photoHtml}
+                    </div>
+                    <div class="details">
+                        <div class="name">${(employee.empId || '') === meEmpId ? '👑 ' : ''}${fullName || '(No Name)'}</div>
+                        <div class="detail"><span class="label">Emp ID:</span>${employee.empId || ''}</div>
+                        <div class="detail"><span class="label">Email:</span>${employee.email || ''}</div>
+                        <div class="detail"><span class="label">Phone:</span>${employee.phone || ''}</div>
+                        ${positionsHtml ? `<div class="positions">${positionsHtml}</div>` : ''}
+                        ${employee.status ? `<div class="detail" style="margin-top:6px;"><span class="label">Status:</span>${renderStatusBadge(employee.status)}</div>` : ''}
+                        ${employee.note ? `<div class="detail" style="margin-top:8px;"><span class="label">Notes:</span>${employee.note}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function showEmptyState(message) {
+            const container = document.getElementById('tableContainer');
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <div>${message}</div>
+                </div>
+            `;
+        }
+
+        function selectRow(index) {
+            activeRowIndex = index;
+            renderTable();
+        }
+
+        function sortTable(column) {
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+            applyFilters();
+        }
+
+        function getSortArrow(column) {
+            if (sortColumn !== column) return '';
+            return sortDirection === 'asc' ? '↑' : '↓';
+        }
+
+        // Utility functions
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = `status-message status-${type}`;
+            statusEl.style.display = 'block';
+            
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 3000);
+        }
+
+        function renderStatusBadge(status) {
+            const normalized = (status || 'Active').toLowerCase();
+            const isActive = normalized === 'active';
+            const cls = isActive ? 'status-active' : 'status-inactive';
+            const safe = isActive ? 'Active' : 'Inactive';
+            return `<span class="status-badge ${cls}"><span class="dot"></span>${safe}</span>`;
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Don't trigger shortcuts when typing in inputs
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                if (e.key === 'Enter' && e.target.closest('#employeeFormModal')) {
+                    e.preventDefault();
+                    saveEmployee();
+                }
+                return;
+            }
+            
+            if (e.altKey || e.ctrlKey || e.metaKey) return;
+            
+            switch(e.key.toLowerCase()) {
+                case 'a':
+                    e.preventDefault();
+                    addEmployee();
+                    break;
+                case 'e':
+                    e.preventDefault();
+                    editEmployee();
+                    break;
+                case 'd':
+                    e.preventDefault();
+                    deleteEmployee();
+                    break;
+                case 'x':
+                    e.preventDefault();
+                    google.script.host.close();
+                    break;
+                case 'c':
+                    e.preventDefault();
+                    if (!isCardView) { isCardView = true; const btn = document.getElementById('toggleViewButton'); if (btn) btn.innerHTML = '<u>T</u>able View'; renderTable(); }
+                    break;
+                case 't':
+                    e.preventDefault();
+                    if (isCardView) { isCardView = false; const btn = document.getElementById('toggleViewButton'); if (btn) btn.innerHTML = '<u>C</u>ard View'; renderTable(); }
+                    break;
+                case 'arrowup':
+                    e.preventDefault();
+                    if (isCardView) { moveCardSelection('up'); }
+                    else if (activeRowIndex > 0) { selectRow(activeRowIndex - 1); }
+                    break;
+                case 'arrowdown':
+                    e.preventDefault();
+                    if (isCardView) { moveCardSelection('down'); }
+                    else if (activeRowIndex < filteredEmployees.length - 1) { selectRow(activeRowIndex + 1); }
+                    break;
+                case 'arrowleft':
+                    if (isCardView) { e.preventDefault(); moveCardSelection('left'); }
+                    break;
+                case 'arrowright':
+                    if (isCardView) { e.preventDefault(); moveCardSelection('right'); }
+                    break;
+                case 'escape':
+                    if (document.getElementById('employeeFormModal').style.display === 'block') {
+                        e.preventDefault();
+                        closeEmployeeForm();
+                    }
+                    break;
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('employeeFormModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEmployeeForm();
+            }
+        });
+
+        function updatePhotoPreview(url) {
+            const preview = document.getElementById('photoPreview');
+            if (!preview) return;
+            if (url) {
+                preview.src = url;
+                preview.style.display = 'block';
+            } else {
+                preview.removeAttribute('src');
+                preview.style.display = 'none';
+            }
+        }
+
+        function onPhotoFileSelected(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const dataUrl = e.target.result;
+                const empId = document.getElementById('empId').value.trim() || 'unassigned';
+                showStatus('Uploading photo...', 'success');
+                document.body.classList.add('loading');
+                google.script.run
+                    .withSuccessHandler(function(result) {
+                        document.body.classList.remove('loading');
+                        if (result && result.success && result.url) {
+                            const url = result.url;
+                            document.getElementById('photoUrl').value = url;
+                            updatePhotoPreview(url);
+                            showStatus('Photo uploaded', 'success');
+                        } else {
+                            showStatus('Photo upload failed', 'error');
+                        }
+                    })
+                    .withFailureHandler(function(error) {
+                        document.body.classList.remove('loading');
+                        showStatus('Photo upload failed: ' + error.message, 'error');
+                    })
+                    .uploadEmployeePhoto(dataUrl, file.name, empId);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function hydratePositionChecklist() {
+            // If dynamic positions exist in memory, render them, else keep existing
+            if (!Array.isArray(window.customPositions) || window.customPositions.length === 0) return;
+            const container = document.getElementById('positionSelect');
+            if (!container) return;
+            container.innerHTML = '';
+            window.customPositions.forEach((p, idx) => {
+                const id = `pos-${idx}`;
+                const row = document.createElement('div');
+                row.className = 'multi-select-option';
+                row.innerHTML = `<input type="checkbox" id="${id}" value="${p}"><label for="${id}">${p}</label>`;
+                container.appendChild(row);
+            });
+        }
+
+        function loadPositionsFromServer() {
+            if (window.__positionsLoading) return;
+            window.__positionsLoading = true;
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    window.__positionsLoading = false;
+                    if (result && result.success) {
+                        window.customPositions = result.positions || [];
+                        hydratePositionChecklist();
+                    }
+                })
+                .withFailureHandler(function(){ window.__positionsLoading = false; })
+                .getPositionsList();
+        }
+
+        function openPositionsManager() {
+            const current = Array.isArray(window.customPositions) && window.customPositions.length
+                ? window.customPositions.slice()
+                : Array.from(document.querySelectorAll('#positionSelect label')).map(l => l.textContent);
+            const value = prompt('Edit positions (comma separated):', current.join(', '));
+            if (value == null) return;
+            const list = value.split(',').map(s => s.trim()).filter(Boolean);
+            window.customPositions = list;
+            hydratePositionChecklist();
+            google.script.run
+                .withSuccessHandler(function(){ showStatus('Positions updated', 'success'); })
+                .withFailureHandler(function(e){ showStatus('Failed to save positions: ' + e.message, 'error'); })
+                .savePositionsList(list);
+        }
+
+        function toggleTheme() {
+            const isDark = document.body.classList.toggle('dark');
+            try { localStorage.setItem('crm_theme', isDark ? 'dark' : 'light'); } catch (e) {}
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const btn = document.getElementById('themeToggleButton');
+            if (!btn) return;
+            const isDark = document.body.classList.contains('dark');
+            btn.textContent = isDark ? '☀️' : '🌙';
+        }
+    </script>
+</body>
+</html>
