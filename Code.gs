@@ -19,6 +19,12 @@ const DATA_START_ROW = 2;
 // Headers in order
 const HEADERS = ['Emp Id', 'First Name', 'Last Name', 'Phone', 'Email', 'Position', 'Status', 'Note', 'Photo URL'];
 
+// Shifts sheet configuration
+const SHIFT_SHEET_NAME = 'Shifts';
+const SHIFT_HEADER_ROW = 1;
+const SHIFT_DATA_START_ROW = 2;
+const SHIFT_HEADERS = ['Shift Id', 'Date', 'Start Time', 'End Time', 'Tips'];
+
 /**
  * Runs when the spreadsheet is opened - adds the CRM menu
  */
@@ -28,6 +34,7 @@ function onOpen() {
     .addItem('Open CRM Manager', 'openCRMDialog')
     .addSeparator()
     .addItem('Initialize Sheet2', 'initializeSheet')
+    .addItem('Initialize Shifts Sheet', 'initializeShiftsSheet')
     .addToUi();
 }
 
@@ -418,6 +425,115 @@ function uploadEmployeePhoto(dataUrl, fileName, empId) {
     return { success: true, url: viewUrl, id: id };
   } catch (error) {
     Logger.log('Error in uploadEmployeePhoto: ' + error.toString());
+    return { success: false, error: error.toString() };
+  }
+}
+
+// Shifts management
+function getShiftSheet() {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = spreadsheet.getSheetByName(SHIFT_SHEET_NAME);
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(SHIFT_SHEET_NAME);
+    Logger.log(`Created new sheet: ${SHIFT_SHEET_NAME}`);
+  }
+  return sheet;
+}
+
+function initializeShiftsSheet() {
+  const sheet = getShiftSheet();
+  const existingHeaders = sheet.getRange(SHIFT_HEADER_ROW, 1, 1, SHIFT_HEADERS.length).getValues()[0];
+  const hasHeaders = existingHeaders.some(function(header){ return header !== ''; });
+
+  if (!hasHeaders) {
+    sheet.getRange(SHIFT_HEADER_ROW, 1, 1, SHIFT_HEADERS.length).setValues([SHIFT_HEADERS]);
+
+    const headerRange = sheet.getRange(SHIFT_HEADER_ROW, 1, 1, SHIFT_HEADERS.length);
+    headerRange.setBackground('#f8f9fa');
+    headerRange.setFontWeight('bold');
+    headerRange.setBorder(true, true, true, true, true, true);
+
+    SpreadsheetApp.getUi().alert('Success', 'Shifts sheet has been initialized with headers!', SpreadsheetApp.getUi().ButtonSet.OK);
+    Logger.log('Shifts sheet initialized with headers');
+  } else {
+    SpreadsheetApp.getUi().alert('Info', 'Shifts sheet already has headers initialized.', SpreadsheetApp.getUi().ButtonSet.OK);
+  }
+
+  return sheet;
+}
+
+function getAllShifts() {
+  try {
+    const sheet = getShiftSheet();
+    const lastRow = sheet.getLastRow();
+    if (lastRow < SHIFT_DATA_START_ROW) {
+      return { success: true, shifts: [] };
+    }
+
+    const dataRange = sheet.getRange(SHIFT_DATA_START_ROW, 1, lastRow - SHIFT_HEADER_ROW, SHIFT_HEADERS.length);
+    const values = dataRange.getValues();
+
+    const shifts = values
+      .filter(function(row){ return row[0] !== ''; })
+      .map(function(row){
+        return {
+          shiftId: row[0] || '',
+          date: row[1] || '',
+          startTime: row[2] || '',
+          endTime: row[3] || '',
+          tips: row[4] || 0
+        };
+      });
+
+    Logger.log(`Retrieved ${shifts.length} shifts`);
+    return { success: true, shifts: shifts };
+  } catch (error) {
+    Logger.log('Error in getAllShifts: ' + error.toString());
+    return { success: false, error: error.toString() };
+  }
+}
+
+function addShift(shift) {
+  try {
+    const sheet = getShiftSheet();
+
+    // Ensure headers exist
+    const existingHeaders = sheet.getRange(SHIFT_HEADER_ROW, 1, 1, SHIFT_HEADERS.length).getValues()[0];
+    const hasHeaders = existingHeaders.some(function(header){ return header !== ''; });
+    if (!hasHeaders) {
+      sheet.getRange(SHIFT_HEADER_ROW, 1, 1, SHIFT_HEADERS.length).setValues([SHIFT_HEADERS]);
+      const headerRange = sheet.getRange(SHIFT_HEADER_ROW, 1, 1, SHIFT_HEADERS.length);
+      headerRange.setBackground('#f8f9fa');
+      headerRange.setFontWeight('bold');
+      headerRange.setBorder(true, true, true, true, true, true);
+    }
+
+    // Check for duplicate Shift ID
+    const lastRow = sheet.getLastRow();
+    if (lastRow >= SHIFT_DATA_START_ROW) {
+      const dataRange = sheet.getRange(SHIFT_DATA_START_ROW, 1, lastRow - SHIFT_HEADER_ROW, 1);
+      const ids = dataRange.getValues().flat();
+      const duplicate = ids.findIndex(function(id){ return id === shift.shiftId; });
+      if (duplicate !== -1) {
+        return { success: false, error: 'Shift ID already exists' };
+      }
+    }
+
+    const tipsNumber = (function(v){ var n = Number(v); return isNaN(n) ? 0 : n; })(shift.tips);
+    const newRow = [
+      shift.shiftId || '',
+      shift.date || '',
+      shift.startTime || '',
+      shift.endTime || '',
+      tipsNumber
+    ];
+
+    sheet.appendRow(newRow);
+
+    Logger.log('Added shift: ' + (shift.shiftId || ''));
+    return { success: true, message: 'Shift added successfully' };
+  } catch (error) {
+    Logger.log('Error in addShift: ' + error.toString());
     return { success: false, error: error.toString() };
   }
 }
